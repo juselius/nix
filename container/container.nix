@@ -39,6 +39,7 @@ in {
     name = name;
     contents = [
       coreutils
+
     ];
 
     runAsRoot = ''
@@ -46,8 +47,8 @@ in {
       ${dockerTools.shadowSetup}
       groupadd demo
       useradd demo
-      mkdir -p /data
-      chown -R demo:demo /data
+      mkdir -p /opt
+      chown -R demo:demo /opt
     '';
 
     config = {
