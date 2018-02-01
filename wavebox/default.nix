@@ -1,7 +1,7 @@
 with (import <nixpkgs> {});
 let
 
-  version = "3.3.0";
+  version = "3.9.0";
 
   rpath = stdenv.lib.makeLibraryPath [
     alsaLib
@@ -42,8 +42,8 @@ let
   src =
     if stdenv.system == "x86_64-linux" then
       fetchurl {
-        url = "https://github.com/wavebox/waveboxapp/releases/download/v3.3.0/Wavebox_3_3_0_linux_x86_64.tar.gz";
-        sha256 = "1i46xyycbg59hdgmgs0n6pallrsi3vpd9x76g0wvj4c5xarwzrnk";
+        url = "https://github.com/wavebox/waveboxapp/releases/download/v3.9.0/Wavebox_3_9_0_linux_x86_64.tar.gz";
+        sha256 = "0rj61dnyrzh7lj4ibmphyp4ay5qfjqr9n62cgkdxcw2jhkw5jynx";
       }
     else
       throw "Wavebox is not supported on ${stdenv.system}";
@@ -61,7 +61,7 @@ in stdenv.mkDerivation {
     tar vfxz $src
     mv Wavebox-linux-x64 Wavebox
     wavebox=$instdir/Wavebox
-    chmod 644 $wavebox/icon.png
+    chmod 644 $wavebox/wavebox_icon.png
 
     # Otherwise it looks "suspicious"
     chmod -R g-w $out
@@ -73,7 +73,7 @@ in stdenv.mkDerivation {
 
     # Fix the symlink
     mkdir $out/bin
-    ln -s $out/libexec/Wavebox/Wavebox $out/bin/Wavebox
+    ln -s $out/libexec/Wavebox/Wavebox $out/bin/wavebox
 
     # Fix the desktop link
     mkdir -p $out/share/applications
