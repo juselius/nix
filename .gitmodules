@@ -1,0 +1,3 @@
+[submodule "nixos-iso"]
+	path = nixos-iso
+	url = git@gitlab.com:serit/k8s/nixos-iso.git
