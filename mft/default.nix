@@ -1,9 +1,9 @@
 with import <nixpkgs> {};
 let
-  version = "4.26.0";
-  ver = "${version}-93";
+  version = "4.27.0";
+  ver = "${version}-83";
   arch = "amd64";
-  srcdir = "mft-${ver}-x86_64-deb";
+  dir = "mft-${ver}-x86_64-deb";
   kernel = pkgs.linux.dev;
 
   rpath = lib.strings.concatStringsSep ":" [
@@ -12,13 +12,21 @@ let
     "${stdenv.cc.cc.lib.outPath}/lib"
   ];
 
+  src = pkgs.fetchurl {
+    url = "https://www.mellanox.com/downloads/MFT/mft-${ver}-x86_64-deb.tgz";
+    hash = "sha256-Mx2dyHSFkZ+vsorAd7yVe2vU8nhksoGieE+LPcA5fZA=";
+  };
+
   mkmft = x: stdenv.mkDerivation {
     name = "mft${x}-${ver}";
+    inherit src;
+
     buildCommand = ''
       #!${pkgs.bash}/bin/bash
       source $stdenv/setup
       PATH=${pkgs.dpkg}/bin:$PATH
-      dpkg -x $src $out
+      tar vfxz $src
+      dpkg -x ${dir}/DEBS/mft${x}_${ver}_${arch}.deb $out
       for i in $out/usr/bin/*; do
          if $(file $i | grep -q 'ELF.*dynamic'); then
            patchelf \
@@ -29,7 +37,6 @@ let
          fi
       done
     '';
-    src = ./${srcdir}/DEBS/mft${x}_${ver}_${arch}.deb;
   };
 in
 {
@@ -40,14 +47,15 @@ in
   mft-kernel-module = stdenv.mkDerivation {
     name = "mft-kernel-module";
     pname = "mft-kernel-module";
-
-    src = ./${srcdir}/SDEBS/kernel-mft-dkms_${ver}_all.deb;
+    # src = ./${dir}/SDEBS/kernel-mft-dkms_${ver}_all.deb;
+    inherit src;
 
     unpackPhase = ''
       #!${pkgs.bash}/bin/bash
       source $stdenv/setup
       PATH=${pkgs.dpkg}/bin:$PATH
-      dpkg -x $src $out
+      tar vfxz $src
+      dpkg -x ${dir}/SDEBS/kernel-mft-dkms_${ver}_all.deb $out
       export sourceRoot="$out/usr/src/kernel-mft-dkms-${version}";
       cd $out
     '';
