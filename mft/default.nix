@@ -22,17 +22,7 @@ let
       mv mft-${ver}-x86_64-deb deb
   '';
 
-  mkmft = x: stdenv.mkDerivation {
-    name = "mft${x}-${ver}";
-    inherit src;
-    inherit unpackPhase;
-
-    installPhase = ''
-      PATH=/bin:$PATH
-      dpkg -x deb/DEBS/mft${x}_${ver}_${arch}.deb $out
-    '';
-
-    preFixup = ''
+  preFixup = ''
       for i in $out/usr/bin/*; do
          if $(file $i | grep -q 'ELF.*dynamic'); then
            patchelf \
@@ -42,13 +32,49 @@ let
             patchShebangs --build $i
          fi
       done
-    '';
-  };
+  '';
+
 in
 {
-  oem = mkmft "-oem";
-  pcap = mkmft "-pcap";
-  mft = mkmft "";
+  mft = stdenv.mkDerivation {
+    name = "mft-${ver}";
+    inherit src unpackPhase preFixup;
+
+    installPhase = ''
+      PATH=/bin:$PATH
+      dpkg -x deb/DEBS/mft_${ver}_${arch}.deb $out
+      rm $out/usr/bin/mst
+      mv $out/etc/init.d/mst $out/usr/bin
+      rmdir $out/etc/init.d
+      sed -i "s,/usr/mst,$out&,;
+              s,/sbin/modprobe,${pkgs.kmod}&,;
+              s,/sbin/lsmod,${pkgs.kmod}&,;
+              s,=lspci,=${pkgs.pciutils}/bin/lspci,;
+              s,mbindir=,&$out,;
+              s,mlibdir=,&$out,;
+              s,PATH=.*,&:/run/current-system/sw/bin,;" $out/usr/bin/mst
+    '';
+  };
+
+  oem = stdenv.mkDerivation {
+    name = "mft-oem-${ver}";
+    inherit src unpackPhase preFixup;
+
+    installPhase = ''
+      PATH=/bin:$PATH
+      dpkg -x deb/DEBS/mft-oem_${ver}_${arch}.deb $out
+    '';
+  };
+
+  pcap = stdenv.mkDerivation {
+    name = "mft-pcap${ver}";
+    inherit src unpackPhase preFixup;
+
+    installPhase = ''
+      PATH=/bin:$PATH
+      dpkg -x deb/DEBS/mft-pcap_${ver}_${arch}.deb $out
+    '';
+  };
 
   mft-kernel-module = stdenv.mkDerivation {
     name = "mft-kernel-module";
