@@ -46,15 +46,15 @@ rec {
       mv $out/etc/init.d/mst $out/usr/bin/mst
       rmdir $out/etc/init.d
       sed -i "s,/usr/mst,$out&,;
-              s,/sbin/modprobe,${pkgs.kmod}&,;
-              s,/sbin/lsmod,${pkgs.kmod}&,;
+              s,modprobe \+-r,rmmod,;
+              s,/sbin/modprobe,modeprobe,;
+              s,/sbin/lsmod,lsmod,;
               s,=lspci,=${pkgs.pciutils}/bin/lspci,;
               s,mbindir=,&$out,;
               s,mlibdir=,&$out,;
-              s,modprobe \+-r,rmmod,;
               s,MST_PCI_MOD=.*,MST_PCI_MOD="${mft-kernel-module}/lib/modules/${kernel.version}/extras/mft/mst_pci.ko,";
               s,MST_PCICONF_MOD=.*,MST_PCICONF_MOD="${mft-kernel-module}/lib/modules/${kernel.version}/extras/mft/mst_pciconf.ko,";
-              s,PATH=.*,&:/run/current-system/sw/bin,;" $out/usr/bin/mst
+              s,PATH=.*,&:/run/current-system/sw/bin:${pkgs.kmod}/bin,;" $out/usr/bin/mst
       sed -i "s,mft_prefix_location=.*,mft_prefix_location=$out/usr," $out/etc/mft/mft.conf
       mkdir $out/bin
       cp -s $out/usr/bin/* $out/bin
