@@ -45,16 +45,18 @@ rec {
       rm $out/usr/bin/mst
       mv $out/etc/init.d/mst $out/usr/bin/mst
       rmdir $out/etc/init.d
-      sed -i "s,/usr/mst,$out&,;
-              s,/sbin/modprobe,${pkgs.kmod}&,;
-              s,/sbin/lsmod,${pkgs.kmod}&,;
+      sed -i "15i export PATH=/run/current-system/sw/bin:${pkgs.kmod}/bin
+              s,/usr/mst,$out&,;
+              s,/sbin/modprobe,modprobe,;
+              s,/sbin/lsmod,lsmod,;
+              s,lsmod,${pkgs.kmod}/bin/lsmod,;
+              s,modprobe \+-r,${pkgs.kmod}/bin/rmmod,;
               s,=lspci,=${pkgs.pciutils}/bin/lspci,;
               s,mbindir=,&$out,;
               s,mlibdir=,&$out,;
-              s,modprobe \+-r,rmmod,;
               s,MST_PCI_MOD=.*,MST_PCI_MOD="${mft-kernel-module}/lib/modules/${kernel.version}/extras/mft/mst_pci.ko,";
               s,MST_PCICONF_MOD=.*,MST_PCICONF_MOD="${mft-kernel-module}/lib/modules/${kernel.version}/extras/mft/mst_pciconf.ko,";
-              s,PATH=.*,&:/run/current-system/sw/bin,;" $out/usr/bin/mst
+              s,^PATH=.*,PATH=\$\{PATH\}:\$\{mbindir\},;" $out/usr/bin/mst
       sed -i "s,mft_prefix_location=.*,mft_prefix_location=$out/usr," $out/etc/mft/mft.conf
       mkdir $out/bin
       cp -s $out/usr/bin/* $out/bin
