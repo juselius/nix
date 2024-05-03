@@ -19,7 +19,7 @@ in
     environment.etc."mft/mst.conf".source = "${mft.mft}/etc/mft/mst.conf";
     environment.etc."mft/ca-bundle.crt".source = "${mft.mft}/etc/mft/ca-bundle.crt";
 
-    environment.systemPackages = [ mft.mft ];
+    environment.systemPackages = [ mft.mft kmod ];
 
     # boot = {
     #   kernelModules = [ "mst_pci" "mst_pciconf" ];
